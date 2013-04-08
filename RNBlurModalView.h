@@ -25,17 +25,24 @@
 
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
+#import "RNBlurMessageView.h"
 
 extern NSString * const kRNBlurDidShowNotification;
 extern NSString * const kRNBlurDidHidewNotification;
 
+@interface RNCloseButton : UIButton
+@end
+
 @interface RNBlurModalView : UIView
 
 @property (assign, readonly) BOOL isVisible;
+@property (retain) RNCloseButton *dismissButton;
 
 @property (assign) CGFloat animationDuration;
 @property (assign) CGFloat animationDelay;
 @property (assign) UIViewAnimationOptions animationOptions;
+
++ (RNBlurMessageView *)generateModalViewWithTitle:(NSString*)title message:(NSString*)message;
 
 - (id)initWithViewController:(UIViewController*)viewController view:(UIView*)view;
 - (id)initWithViewController:(UIViewController*)viewController title:(NSString*)title message:(NSString*)message;

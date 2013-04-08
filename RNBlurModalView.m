@@ -23,9 +23,10 @@
  * SOFTWARE.
  */
 
-#import "RNBlurModalView.h"
 #import <Accelerate/Accelerate.h>
 #import <QuartzCore/QuartzCore.h>
+#import "RNBlurModalView.h"
+#import "UIView+Sizes.h"
 
 /*
     This bit is important! In order to prevent capturing selected states of UIResponders I've implemented a delay. Please feel free to set this delay to *whatever* you deem apprpriate.
@@ -48,21 +49,6 @@ NSString * const kRNBlurDidHidewNotification = @"com.whoisryannystrom.RNBlurModa
 
 typedef void (^RNBlurCompletion)(void);
 
-@interface UILabel (AutoSize)
-- (void)autoHeight;
-@end
-
-@interface UIView (Sizes)
-@property (nonatomic) CGFloat left;
-@property (nonatomic) CGFloat top;
-@property (nonatomic) CGFloat right;
-@property (nonatomic) CGFloat bottom;
-@property (nonatomic) CGFloat width;
-@property (nonatomic) CGFloat height;
-@property (nonatomic) CGPoint origin;
-@property (nonatomic) CGSize size;
-@end
-
 @interface UIView (Screenshot)
 - (UIImage*)screenshot;
 @end
@@ -75,9 +61,6 @@ typedef void (^RNBlurCompletion)(void);
 - (id)initWithCoverView:(UIView*)view;
 @end
 
-@interface RNCloseButton : UIButton
-@end
-
 @interface RNBlurModalView ()
 @property (assign, readwrite) BOOL isVisible;
 @end
@@ -88,62 +71,21 @@ typedef void (^RNBlurCompletion)(void);
     UIViewController *_controller;
     UIView *_parentView;
     UIView *_contentView;
-    RNCloseButton *_dismissButton;
     RNBlurView *_blurView;
     RNBlurCompletion _completion;
 }
 
-+ (UIView*)generateModalViewWithTitle:(NSString*)title message:(NSString*)message {
-    CGFloat defaultWidth = 280.f;
-    CGRect frame = CGRectMake(0, 0, defaultWidth, 0);
-    CGFloat padding = 10.f;
-    UIView *view = [[UIView alloc] initWithFrame:frame];
-    
-    UIColor *whiteColor = [UIColor colorWithRed:0.816 green:0.788 blue:0.788 alpha:1.000];
-    
-    view.backgroundColor = [UIColor colorWithWhite:0.1 alpha:0.8f];
-    view.layer.borderColor = whiteColor.CGColor;
-    view.layer.borderWidth = 2.f;
-    view.layer.cornerRadius = 10.f;
-    
-    UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(padding, 0, defaultWidth - padding * 2.f, 0)];
-    titleLabel.text = title;
-    titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:17.f];
-    titleLabel.textColor = [UIColor whiteColor];
-    titleLabel.shadowColor = [UIColor blackColor];
-    titleLabel.shadowOffset = CGSizeMake(0, -1);
-    titleLabel.textAlignment = NSTextAlignmentCenter;
-    titleLabel.backgroundColor = [UIColor clearColor];
-    [titleLabel autoHeight];
-    titleLabel.top = padding;
-    [view addSubview:titleLabel];
-    
-    UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(padding, 0, defaultWidth - padding * 2.f, 0)];
-    messageLabel.text = message;
-    messageLabel.numberOfLines = 0;
-    messageLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:17.f];
-    messageLabel.textColor = titleLabel.textColor;
-    messageLabel.shadowOffset = titleLabel.shadowOffset;
-    messageLabel.shadowColor = titleLabel.shadowColor;
-    messageLabel.textAlignment = NSTextAlignmentCenter;
-    messageLabel.backgroundColor = [UIColor clearColor];
-    [messageLabel autoHeight];
-    messageLabel.top = titleLabel.bottom + padding;
-    [view addSubview:messageLabel];
-    
-    view.height = messageLabel.bottom + padding;
-    
-    view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
-    
-    return view;
++ (RNBlurMessageView *)generateModalViewWithTitle:(NSString*)title message:(NSString*)message
+{
+    return [[RNBlurMessageView alloc] initWithFrame:CGRectMake(0, 0, 280.f, 0) withTitle:title withMessage:message];
 }
 
 
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        _dismissButton = [[RNCloseButton alloc] init];
-        _dismissButton.center = CGPointZero;
-        [_dismissButton addTarget:self action:@selector(hide) forControlEvents:UIControlEventTouchUpInside];
+        self.dismissButton = [[RNCloseButton alloc] init];
+        self.dismissButton.center = CGPointZero;
+        [self.dismissButton addTarget:self action:@selector(hide) forControlEvents:UIControlEventTouchUpInside];
         
         self.alpha = 0.f;
         self.backgroundColor = [UIColor clearColor];
@@ -173,8 +115,8 @@ typedef void (^RNBlurCompletion)(void);
         _contentView.clipsToBounds = YES;
         _contentView.layer.masksToBounds = YES;
         
-        _dismissButton.center = CGPointMake(view.left, view.top);
-        [self addSubview:_dismissButton];
+        self.dismissButton.center = CGPointMake(view.left, view.top);
+        [self addSubview:self.dismissButton];
     }
     return self;
 }
@@ -198,8 +140,8 @@ typedef void (^RNBlurCompletion)(void);
         _contentView.clipsToBounds = YES;
         _contentView.layer.masksToBounds = YES;
         
-        _dismissButton.center = CGPointMake(view.left, view.top);
-        [self addSubview:_dismissButton];
+        self.dismissButton.center = CGPointMake(view.left, view.top);
+        [self addSubview:self.dismissButton];
     }
     return self;
 }
@@ -230,7 +172,7 @@ typedef void (^RNBlurCompletion)(void);
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    _dismissButton.center = CGPointMake(_contentView.left, _contentView.top);
+    self.dismissButton.center = CGPointMake(_contentView.left, _contentView.top);
 }
 
 - (void)willMoveToSuperview:(UIView *)newSuperview {
@@ -269,7 +211,7 @@ typedef void (^RNBlurCompletion)(void);
     self.hidden = NO;
 
     _contentView.center = CGPointMake(CGRectGetMidX(self.frame), CGRectGetMidY(self.frame));
-    _dismissButton.center = _contentView.origin;
+    self.dismissButton.center = _contentView.origin;
 }
 
 
@@ -392,106 +334,6 @@ typedef void (^RNBlurCompletion)(void);
     return self;
 }
 
-
-@end
-
-#pragma mark - UILabel + Autosize
-
-@implementation UILabel (AutoSize)
-
-- (void)autoHeight {
-    CGRect frame = self.frame;
-    CGSize maxSize = CGSizeMake(frame.size.width, 9999);
-    CGSize expectedSize = [self.text sizeWithFont:self.font constrainedToSize:maxSize lineBreakMode:self.lineBreakMode];
-    frame.size.height = expectedSize.height;
-    [self setFrame:frame];
-}
-
-@end
-
-#pragma mark - UIView + Sizes
-
-@implementation UIView (Sizes)
-
-- (CGFloat)left {
-    return self.frame.origin.x;
-}
-
-- (void)setLeft:(CGFloat)x {
-    CGRect frame = self.frame;
-    frame.origin.x = x;
-    self.frame = frame;
-}
-
-- (CGFloat)top {
-    return self.frame.origin.y;
-}
-
-- (void)setTop:(CGFloat)y {
-    CGRect frame = self.frame;
-    frame.origin.y = y;
-    self.frame = frame;
-}
-
-- (CGFloat)right {
-    return self.frame.origin.x + self.frame.size.width;
-}
-
-- (void)setRight:(CGFloat)right {
-    CGRect frame = self.frame;
-    frame.origin.x = right - frame.size.width;
-    self.frame = frame;
-}
-
-- (CGFloat)bottom {
-    return self.frame.origin.y + self.frame.size.height;
-}
-
-- (void)setBottom:(CGFloat)bottom {
-    CGRect frame = self.frame;
-    frame.origin.y = bottom - frame.size.height;
-    self.frame = frame;
-}
-
-- (CGFloat)width {
-    return self.frame.size.width;
-}
-
-- (void)setWidth:(CGFloat)width {
-    CGRect frame = self.frame;
-    frame.size.width = width;
-    self.frame = frame;
-}
-
-- (CGFloat)height {
-    return self.frame.size.height;
-}
-
-- (void)setHeight:(CGFloat)height {
-    CGRect frame = self.frame;
-    frame.size.height = height;
-    self.frame = frame;
-}
-
-- (CGPoint)origin {
-    return self.frame.origin;
-}
-
-- (void)setOrigin:(CGPoint)origin {
-    CGRect frame = self.frame;
-    frame.origin = origin;
-    self.frame = frame;
-}
-
-- (CGSize)size {
-    return self.frame.size;
-}
-
-- (void)setSize:(CGSize)size {
-    CGRect frame = self.frame;
-    frame.size = size;
-    self.frame = frame;
-}
 
 @end
 
