@@ -85,6 +85,8 @@ typedef void (^RNBlurCompletion)(void);
     if (self = [super initWithFrame:frame]) {
         self.dismissButton = [[RNCloseButton alloc] init];
         self.dismissButton.center = CGPointZero;
+        self.dismissButton.accessibilityLabel = @"Close button";
+        self.dismissButton.accessibilityHint = @"Tap to dismiss popup";
         [self.dismissButton addTarget:self action:@selector(hide) forControlEvents:UIControlEventTouchUpInside];
         
         self.alpha = 0.f;
