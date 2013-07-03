@@ -505,12 +505,16 @@ typedef void (^RNBlurCompletion)(void);
     
     //perform convolution
     error = vImageBoxConvolve_ARGB8888(&inBuffer, &outBuffer2, NULL, 0, 0, boxSize, boxSize, NULL, kvImageEdgeExtend);
-    error = vImageBoxConvolve_ARGB8888(&outBuffer2, &inBuffer, NULL, 0, 0, boxSize, boxSize, NULL, kvImageEdgeExtend);
-    error = vImageBoxConvolve_ARGB8888(&inBuffer, &outBuffer, NULL, 0, 0, boxSize, boxSize, NULL, kvImageEdgeExtend);
-
-    if (error) {
+    if (error)
         NSLog(@"error from convolution %ld", error);
-    }
+
+    error = vImageBoxConvolve_ARGB8888(&outBuffer2, &inBuffer, NULL, 0, 0, boxSize, boxSize, NULL, kvImageEdgeExtend);
+    if (error)
+        NSLog(@"error from convolution %ld", error);
+
+    error = vImageBoxConvolve_ARGB8888(&inBuffer, &outBuffer, NULL, 0, 0, boxSize, boxSize, NULL, kvImageEdgeExtend);
+    if (error)
+        NSLog(@"error from convolution %ld", error);
     
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGContextRef ctx = CGBitmapContextCreate(outBuffer.data,
