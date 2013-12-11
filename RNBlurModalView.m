@@ -111,7 +111,6 @@ typedef void (^RNBlurCompletion)(void);
     if (self = [self initWithFrame:CGRectMake(0, 0, viewController.view.width, viewController.view.height)]) {
         [self addSubview:view];
         _contentView = view;
-        _contentView.center = CGPointMake(CGRectGetMidX(self.frame), CGRectGetMidY(self.frame));
         _controller = viewController;
         _parentView = nil;
         _contentView.clipsToBounds = YES;
@@ -136,7 +135,6 @@ typedef void (^RNBlurCompletion)(void);
     if (self = [self initWithFrame:CGRectMake(0, 0, parentView.width, parentView.height)]) {
         [self addSubview:view];
         _contentView = view;
-        _contentView.center = CGPointMake(CGRectGetMidX(self.frame), CGRectGetMidY(self.frame));
         _controller = nil;
         _parentView = parentView;
         _contentView.clipsToBounds = YES;
